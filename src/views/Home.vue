@@ -74,12 +74,27 @@
       </b-taginput>
     </b-field>
 
-    <div class="camera-mod">
-        <video ref="video" class="camera-stream"/>
-    </div>
-    <img v-bind:src="meeting_picture" class="metting_picture_box" />
+    <b-field label="Cámara">
+      <b-select v-model="selectedCameraId" placeholder="Selecciona la cámara" @input="getStream">
+        <option
+          v-for="option in cameras"
+          :value="option.id"
+          :key="option.id">
+          {{ option.text }}
+        </option>
+      </b-select>
+    </b-field>
+    
+    <video ref="video" autoplay playsinline></video>
+    <canvas ref="canvas"></canvas>
+    <ul>
+      <li v-for="c in captures" :key="c">
+        <img class="captures" :src="c" />
+      </li>
+    </ul>
+
     <div class="field has-text-centered">
-      <button class="button is-success is-rounded" @click.prevent="capture">
+      <button class="button is-success is-rounded" @click.prevent="grabFrame">
         <b-icon icon="camera"></b-icon>
       </button>
     </div>
@@ -136,8 +151,14 @@ export default {
       filteredTags: data2,
       observations: [],
       suggestions: [],
-      meeting_picture: '',
-      mediaStream: null
+      mediaStream: null,
+      cameras: [],
+      constraints: {},
+      video: null,
+      canvas: null,
+      imageCapture: null,
+      selectedCameraId: null,
+      captures: []
     }
   },
   methods: {
@@ -149,27 +170,78 @@ export default {
           .indexOf(text.toString().toLowerCase()) >= 0
       })
     },
-    capture () {
-      const mediaStreamTrack = this.mediaStream.getVideoTracks()[0]
-      const imageCapture = new window.ImageCapture(mediaStreamTrack)
-      return imageCapture.takePhoto().then(blob => {
-        this.meeting_picture = URL.createObjectURL(blob)
-        console.log(blob)
+    grabFrame () {
+      this.canvas = this.$refs.canvas;
+      // let context = this.canvas.getContext("2d").drawImage(this.video, 0, 0, 900, 480);
+      // console.log(this.canvas.toDataURL("image/png"))
+      // this.captures.push(this.canvas.toDataURL("image/png"));
+      this.imageCapture.grabFrame().then((imageBitmap) => {
+        this.canvas.width = imageBitmap.width;
+        this.canvas.height = imageBitmap.height;
+        this.canvas.getContext('2d').drawImage(imageBitmap, 0, 0);
+        this.captures.push(this.canvas.toDataURL("image/png"));
+      });
+    },
+    gotDevices (mediaDevices) {
+      console.log('mediadevices got', mediaDevices);
+      let count = 1;
+      mediaDevices.forEach(mediaDevice => {
+        let option = {};
+        if (mediaDevice.kind === 'videoinput') {
+          option.id = mediaDevice.deviceId;
+          option.text = mediaDevice.label || `Camera ${count++}`;
+          this.cameras.push(option);
+        }
       })
+    },
+    getStream () {
+      console.log('mediastream', this.mediaStream);
+      if (typeof this.mediaStream !== 'undefined' && this.mediaStream !== null) {
+        this.stopMediaTracks(this.mediaStream);
+      }
+      const videoConstraints = {};
+      if (this.selectedCameraId === '') {
+        videoConstraints.facingMode = 'environment';
+      } else {
+        videoConstraints.deviceId = { exact: this.selectedCameraId };
+      }
+      const constraints = {
+        video: videoConstraints,
+        audio: false
+      };
+      this.video = this.$refs.video;
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then(stream => {
+          this.mediaStream = stream;
+          console.log('ref video', this.$refs.video);
+          this.imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
+          this.video.srcObject = stream;
+          //this.video.src = window.URL.createObjectURL(stream);
+          this.video.play();
+          //return navigator.mediaDevices.enumerateDevices();
+        })
+        //.then(this.gotDevices)
+        .catch(error => {
+          console.error(error);
+        });
+    },
+    stopMediaTracks(stream) {
+      stream.getTracks().forEach(track => {
+        track.stop();
+      });
+    },
+    trial () {
+      console.log('trial')
     }
   },
   mounted () {
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(mediaStream => {
-          this.mediaStream = mediaStream
-          this.$refs.video.srcObject = mediaStream
-          this.$refs.video.play()
-        })
-        .catch(error => console.error('getUserMedia() error:', error))
-  },
-  destroyed () {
-    const tracks = this.mediaStream.getTracks()
-    tracks.map(track => track.stop())
+    navigator.mediaDevices.enumerateDevices()
+      .then(this.gotDevices)
+      .catch(error => {
+        console.log('enumerateDevices() error: ', error);
+      });
+    //this.cameras = [{id: 1, text: 'cam1'}, {id: 2, text: 'cam2'}]
   }
 }
 </script>
@@ -184,8 +256,25 @@ export default {
     width: 100%;
     max-height: 100%;
   }
-  .meeting_picture_box {
-    height: 50px;
-    width: 50px;
+  canvas {
+    display: none;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  video {
+    width: 100%;
+    max-width: 600px;
+    display: block;
+    margin: 0 auto;
+  }
+  li {
+    display: inline;
+    padding: 5px;
+    
+  }
+  .captures {
+    max-width: 7%;
+    max-height: 7%;
   }
 </style>
