@@ -24,7 +24,7 @@
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <a class="button is-primary">
+          <a class="button is-primary" to="/login">
             <strong>Iniciar Sesión</strong>
           </a>
           <button @click.prevent="logout" class="button is-light">
