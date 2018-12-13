@@ -44,6 +44,11 @@ export default {
   $link: $primary;
   $link-invert: $primary-invert;
   $link-focus-border: $primary;
+
+  $navbar-background-color: #003062;
+  $navbar-item-color: #FFFFFF;
+  $navbar-item-hover-color: #F8F8F8;
+  $navbar-item-hover-background-color: #004C99;
   // Import Bulma and Buefy styles
   @import "~bulma";
   @import "~buefy/src/scss/buefy";

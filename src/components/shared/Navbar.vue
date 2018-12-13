@@ -1,8 +1,8 @@
 <template>
   <nav class="navbar" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="https://bulma.io">
-      <img src="@/assets/electro_ico.png" width="28" height="28">
+    <a class="navbar-item" href="/">
+      <img src="@/assets/electro_icon.png" width="28" height="28">
       <strong>&nbsp;Electrocentro</strong>
     </a>
 
@@ -27,9 +27,9 @@
           <a class="button is-primary">
             <strong>Iniciar Sesión</strong>
           </a>
-          <a class="button is-light">
+          <button @click.prevent="logout" class="button is-light">
             Cerrar Sesión
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -41,12 +41,25 @@
 <script>
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
+import EventBus from './../../event-bus'
 
 export default {
   data () {
     return {
-      showNav: false    
+      showNav: false,
+      loggedIn: false,
+      loggedOut: true    
     }
+  },
+  methods: {
+    logout () {
+      EventBus.$emit('logout');
+      localStorage.removeItem('token');
+      this.$router.push('/login');
+    }
+  },
+  mounted () {
+
   }    
 }
 </script>

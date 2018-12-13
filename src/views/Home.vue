@@ -30,7 +30,7 @@
 
 
     <b-table
-      :data="data"
+      :data="employees"
       :columns="columns"
       :checked-rows.sync="checkedRows"
       checkable>
@@ -109,6 +109,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 const data2 = [
                 { 'id': 1, 'first_name': 'Jesse', 'last_name': 'Simmons' },
                 { 'id': 2, 'first_name': 'John', 'last_name': 'Jacobs' },
@@ -119,23 +120,14 @@ const data2 = [
 export default {
          
   data () {
-    const data = [
-                { 'id': 1, 'first_name': 'Jesse', 'last_name': 'Simmons' },
-                { 'id': 2, 'first_name': 'John', 'last_name': 'Jacobs' },
-                { 'id': 3, 'first_name': 'Tina', 'last_name': 'Gilbert' },
-                { 'id': 4, 'first_name': 'Clarence', 'last_name': 'Flores' },
-                { 'id': 5, 'first_name': 'Anne', 'last_name': 'Lee' }
-            ];
-    
     return {
       isOpenTitle: false,
       isOpenContent: false,
-      data,
-      checkedRows: [data[1], data[3]],
       keepFirst: false,
       openOnFocus: false,
       selected: null,
-      name: '',  
+      name: '',
+      checkedRows: [],  
       columns: [
         {
             field: 'first_name',
@@ -158,7 +150,8 @@ export default {
       canvas: null,
       imageCapture: null,
       selectedCameraId: null,
-      captures: []
+      captures: [],
+      employees: []
     }
   },
   methods: {
@@ -241,7 +234,17 @@ export default {
       .catch(error => {
         console.log('enumerateDevices() error: ', error);
       });
-    //this.cameras = [{id: 1, text: 'cam1'}, {id: 2, text: 'cam2'}]
+    
+    const auth = {
+      headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}
+    }
+
+    axios.get(process.env.VUE_APP_URL_API + '/employees-by-office', auth)
+      .then(res => {
+        // console.log(res.data);
+        this.employees = res.data;
+      })
+      .catch(err => console.log(err));
   }
 }
 </script>
