@@ -21,7 +21,7 @@ export default {
 
 
 <style lang="scss">
- @import "~bulma/sass/utilities/_all";
+  @import "~bulma/sass/utilities/_all";
   // Set your colors
   $primary: #7957D5;
   $primary-invert: findColorInvert($primary);
