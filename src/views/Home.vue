@@ -162,10 +162,10 @@ export default {
       this.isLoading = true
       axios.post(process.env.VUE_APP_URL_API + '/meeting-attendance', this.meeting, this.auth)
         .then(res => {
-          if (res.data.success !== undefinded) {
+          if (res.data.success !== undefined) {
             this.storeSuccess = true
           }
-          if (res.data.error !== undefinded) {
+          if (res.data.error !== undefined) {
             this.storeError = true
           }
           this.isLoading = false
