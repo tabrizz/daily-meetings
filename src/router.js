@@ -6,7 +6,7 @@ import Login from './views/Login.vue'
 
 Vue.use(Router)
 
-export default new Router({
+let router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -27,3 +27,15 @@ export default new Router({
     }
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  if (['login'].includes(to.name)) {
+    next()
+  } else if (localStorage.getItem("token")) {
+    next()
+  } else {
+    next('/login')
+  }
+})
+
+export default router

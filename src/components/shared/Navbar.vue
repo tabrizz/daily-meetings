@@ -24,16 +24,17 @@
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <a class="button is-primary" to="/login">
+          <a v-if="loggedIn" class="button is-primary" href="/login">
             <strong>Iniciar Sesión</strong>
           </a>
-          <button @click.prevent="logout" class="button is-light">
+          <button v-if="loggedOut" @click.prevent="logout" class="button is-light">
             Cerrar Sesión
           </button>
         </div>
       </div>
     </div>
   </div>
+  <b-loading :is-full-page="true" :active.sync="isLoading"></b-loading>
   </nav>
 
 </template>
@@ -46,20 +47,35 @@ import EventBus from './../../event-bus'
 export default {
   data () {
     return {
+      isLoading: false,
       showNav: false,
-      loggedIn: false,
-      loggedOut: true    
+      loggedIn: true,
+      loggedOut: false    
     }
   },
   methods: {
     logout () {
-      EventBus.$emit('logout');
-      localStorage.removeItem('token');
-      this.$router.push('/login');
+      this.isLoading = true
+      EventBus.$emit('logout')
+      localStorage.removeItem('token')
+      this.isLoading = false
+      this.$router.push('/login')
     }
   },
   mounted () {
+    
+  },
+  created () {
+    EventBus.$on('login', () => {
+      console.log('event login')
+      this.loggedIn = false
+      this.loggedOut = true
+    })
 
+    EventBus.$on('logout', () => {
+      this.loggedIn = true
+      this.loggedOut = false
+    })
   }    
 }
 </script>

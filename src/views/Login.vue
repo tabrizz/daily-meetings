@@ -22,6 +22,7 @@
         </a> 
       </p>
     </div>
+    <b-loading :is-full-page="true" :active.sync="isLoading"></b-loading>
   </form>
 </div>
   
@@ -34,6 +35,7 @@ import EventBus from './../event-bus'
 export default {
    data () {
      return  {
+       isLoading: false,
        user: {
          username: '',
          password: ''
@@ -42,17 +44,20 @@ export default {
    },
   methods: {
     login () {
+      this.isLoading = true        
+              
       axios.post(process.env.VUE_APP_URL_API + '/login', this.user)
         .then(res => {
           // console.log(res.data.token);
-          localStorage.setItem('token', res.data.token);
-          localStorage.setItem('username', res.data.user.name);
 
-          EventBus.$emit('loggedIn');
-          this.$router.push('/');
+          this.isLoading = false
+          localStorage.setItem('token', res.data.token)
+          localStorage.setItem('username', res.data.user.name)
+          EventBus.$emit('login')
+          this.$router.push('/')
         })
         .catch(err => {
-          console.log(err);
+          console.log(err)
         });
     }
   }

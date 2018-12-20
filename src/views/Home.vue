@@ -1,9 +1,15 @@
 <template>
   <div class="home">
+    <b-notification v-if="storeSucces" type="is-success">
+      Asistencia guardada correctamente
+    </b-notification>
+    <b-notification v-if="storeError" type="is-danger">
+      No se pudo guardar la asistencia
+    </b-notification>
+
     <b-field label="Selecciona una fecha">
       <b-datepicker @input="getMeeting" v-model="selectedDate" placeholder="Click para seleccionar..." icon="calendar-today"></b-datepicker>
     </b-field>
-
     <b-collapse class="panel" :open.sync="isOpenTitle">
       <div slot="trigger" class="panel-heading">
         <strong>Ley</strong>
@@ -38,7 +44,7 @@
               <td>{{ employee.first_name }}</td>
               <td>
                 <div class="field">
-                  <b-switch v-model="employee.attended"></b-switch>
+                  <b-switch type="is-success" v-model="employee.attended"></b-switch>
                 </div>
               </td>
               <td>
@@ -106,8 +112,7 @@
         <span>Guardar Asistencia</span>
       </button>
     </div>
-
-    <pre>{{ meeting }}</pre>
+    <b-loading :is-full-page="true" :active.sync="isLoading"></b-loading>
   </div>
 </template>
 
@@ -115,9 +120,7 @@
 // @ is an alias to /src
 import axios from "axios";
 import moment from 'moment';
-const auth = {
-      headers: { Authorization: "Bearer " + localStorage.getItem("token") }
-    }
+
 export default {
   data() {
     return {
@@ -147,26 +150,34 @@ export default {
       canvas: null,
       imageCapture: null,
       selectedCameraId: null,
-      all_employees: []
+      all_employees: [],
+      auth: {},
+      isLoading: false,
+      storeSuccess: false,
+      storeError: false
     };
   },
   methods: {
     storeMeeting () {
-      console.log('porst')
-      axios.post(process.env.VUE_APP_URL_API + '/meeting-attendance', this.meeting, auth)
+      this.isLoading = true
+      axios.post(process.env.VUE_APP_URL_API + '/meeting-attendance', this.meeting, this.auth)
         .then(res => {
-          console.log('saved')
+          if (res.data.success !== undefinded) {
+            this.storeSuccess = true
+          }
+          if (res.data.error !== undefinded) {
+            this.storeError = true
+          }
+          this.isLoading = false
         })
         .catch(err => {
 
         })
     },
     getMeeting() {
-      console.log(this.selectedDate)
-      // let sd = moment(String(this.meeting.selectedDate)).format('YYYY-MM-DD')
       this.meeting.selectedDate = moment(new Date(this.selectedDate)).format('YYYY-MM-DD')
       
-      axios.get(process.env.VUE_APP_URL_API + '/meetings/' + this.meeting.selectedDate, auth)
+      axios.get(process.env.VUE_APP_URL_API + '/meetings/' + this.meeting.selectedDate, this.auth)
         .then(res => {
           if (res.data.length > 0) {
             this.meeting.meeting_id = res.data[0].id
@@ -260,19 +271,19 @@ export default {
     }
   },
   mounted() {
+    this.auth = {
+      headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+    }
     navigator.mediaDevices
       .enumerateDevices()
       .then(this.gotDevices)
       .catch(error => {
         console.log("enumerateDevices() error: ", error);
       });
-
-    
-
+    console.log('auth', this.auth)  
     axios
-      .get(process.env.VUE_APP_URL_API + "/employees-by-office", auth)
+      .get(process.env.VUE_APP_URL_API + "/employees-by-office", this.auth)
       .then(res => {
-        // console.log(res.data);
         this.meeting.employees = res.data;
         this.meeting.employees = this.meeting.employees.map(obj => ({
           ...obj,
@@ -283,7 +294,7 @@ export default {
       .catch(err => console.log(err));
 
     axios
-      .get(process.env.VUE_APP_URL_API + "/employees", auth)
+      .get(process.env.VUE_APP_URL_API + "/employees-all", this.auth)
       .then(res => {
         // console.log(res.data);
         this.all_employees = res.data;
