@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <b-notification v-if="storeSucces" type="is-success">
+    <b-notification v-if="storeSuccess" type="is-success">
       Asistencia guardada correctamente
     </b-notification>
     <b-notification v-if="storeError" type="is-danger">
@@ -29,32 +29,32 @@
     
     <div class="box">
       <div class="table-container">
-        <table class="table">
+        <table class="table is-narrow is-striped is-size-7">
           <thead>
             <tr>
-              <th>Nombres</th>
-              <th>Apellidos</th>
-              <th>A</th>
-              <th>O</th>
+              <th>Apellidos y Nombres</th>
+              <th>Asistió</th>
+              <th>Opciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="employee in meeting.employees" :key="employee.id">
-              <td>{{ employee.last_name }}</td>
-              <td>{{ employee.first_name }}</td>
+              <td>{{ employee.last_name }} {{ employee.first_name }}</td>
               <td>
                 <div class="field">
-                  <b-switch type="is-success" v-model="employee.attended"></b-switch>
+                  <b-checkbox type="is-success" v-model="employee.attended"></b-checkbox>
                 </div>
               </td>
               <td>
                 <b-field>
-                  <b-select :disabled="employee.attended" v-model="employee.missing_reason" placeholder="Selecciona" rounded>
+                  <b-select :disabled="employee.attended" 
+                            v-model="employee.missing_reason" class="is-size-7" placeholder="Selecciona" rounded>
                     <option value="Ninguno">Ninguno</option>
                     <option value="Tarde">Tarde</option>
                     <option value="Permiso">Permiso</option>
                     <option value="Comisión">Comisión</option>
-                    <option value="Comisión">Otros</option>
+                    <option value="Vacaciones">Vacaciones</option>
+                    <option value="Otros">Otros</option>
                   </b-select>
                 </b-field>
               </td>
@@ -69,7 +69,7 @@
         v-model="meeting.guests"
         :data="filteredTags"
         autocomplete
-        field="first_name"
+        field="last_name"
         icon="label"
         placeholder="Agrega invitado"
         @typing="getFilteredTags"
@@ -196,7 +196,7 @@ export default {
     getFilteredTags(text) {
       this.filteredTags = this.all_employees.filter(option => {
         return (
-          option.first_name
+          option.last_name
             .toString()
             .toLowerCase()
             .indexOf(text.toString().toLowerCase()) >= 0
@@ -280,7 +280,6 @@ export default {
       .catch(error => {
         console.log("enumerateDevices() error: ", error);
       });
-    console.log('auth', this.auth)  
     axios
       .get(process.env.VUE_APP_URL_API + "/employees-by-office", this.auth)
       .then(res => {
@@ -291,7 +290,12 @@ export default {
           missing_reason: null
         }));
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err)
+        if (err.response.status === 401) {
+          this.$router.push('/login')
+        }
+      });
 
     axios
       .get(process.env.VUE_APP_URL_API + "/employees-all", this.auth)
@@ -335,4 +339,5 @@ li {
   max-width: 100px;
   max-height: 100px;
 }
+
 </style>

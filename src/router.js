@@ -31,7 +31,7 @@ let router = new Router({
 router.beforeEach((to, from, next) => {
   if (['login'].includes(to.name)) {
     next()
-  } else if (localStorage.getItem("token")) {
+  } else if (localStorage.getItem('token')) {
     next()
   } else {
     next('/login')

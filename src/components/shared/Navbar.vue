@@ -24,10 +24,10 @@
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-          <a v-if="loggedIn" class="button is-primary" href="/login">
+          <!-- <a v-if="!token" class="button is-primary" href="/login">
             <strong>Iniciar Sesión</strong>
-          </a>
-          <button v-if="loggedOut" @click.prevent="logout" class="button is-light">
+          </a> -->
+          <button v-if="loggedOut || token" @click.prevent="logout" class="button is-light">
             Cerrar Sesión
           </button>
         </div>
@@ -47,6 +47,7 @@ import EventBus from './../../event-bus'
 export default {
   data () {
     return {
+      token: localStorage.getItem('token'),
       isLoading: false,
       showNav: false,
       loggedIn: true,
