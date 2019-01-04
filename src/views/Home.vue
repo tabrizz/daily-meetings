@@ -79,14 +79,6 @@
       </b-taginput>
     </b-field>
 
-    <b-field label="Agregar Observaciones">
-      <b-taginput v-model="meeting.observations" icon="label" placeholder="Agrega observaciones"></b-taginput>
-    </b-field>
-
-    <b-field label="Agregar Sugerencias">
-      <b-taginput v-model="meeting.suggestions" icon="label" placeholder="Agrega sugerencias"></b-taginput>
-    </b-field>
-
     <b-field label="Cámara">
       <b-select v-model="selectedCameraId" placeholder="Selecciona la cámara" @input="getStream">
         <option v-for="option in cameras" :value="option.id" :key="option.id">{{ option.text }}</option>
@@ -160,24 +152,45 @@ export default {
   methods: {
     storeMeeting () {
       this.isLoading = true
-      axios.post(process.env.VUE_APP_URL_API + '/meeting-attendance', this.meeting, this.auth)
+      axios.post(process.env.VUE_APP_URL_API + '/meeting-attendance', this.meeting)
         .then(res => {
           if (res.data.success !== undefined) {
             this.storeSuccess = true
+            this.$toast.open({
+                    duration: 3000,
+                    message: `Asistencia guardada`,
+                    position: 'is-bottom',
+                    type: 'is-success'
+                })
           }
           if (res.data.error !== undefined) {
             this.storeError = true
+            this.$toast.open({
+                    duration: 3000,
+                    message: `Asistencia no se guardó`,
+                    position: 'is-bottom',
+                    type: 'is-danger'
+                })
           }
           this.isLoading = false
         })
         .catch(err => {
-
+          if (err.response.status === 500) {
+            this.isLoading = false
+            this.storeError = true
+            this.$toast.open({
+                    duration: 3000,
+                    message: `Asistencia no se guardó`,
+                    position: 'is-bottom',
+                    type: 'is-danger'
+                })
+          }
         })
     },
     getMeeting() {
       this.meeting.selectedDate = moment(new Date(this.selectedDate)).format('YYYY-MM-DD')
       
-      axios.get(process.env.VUE_APP_URL_API + '/meetings/' + this.meeting.selectedDate, this.auth)
+      axios.get(process.env.VUE_APP_URL_API + '/meetings/' + this.meeting.selectedDate)
         .then(res => {
           if (res.data.length > 0) {
             this.meeting.meeting_id = res.data[0].id
@@ -221,11 +234,12 @@ export default {
           option.id = mediaDevice.deviceId;
           // option.text = mediaDevice.label || `Camera ${count++}`;
           if (count === 1) {
-            option.text =  `Cámara Selfie`
+            option.text =  `Tomar Foto Grupal`
           } else {
-            option.text = `Cámara Documento`
+            option.text = `Tomar Foto Control Asistencia`
           }
           this.cameras.push(option);
+          count++
         }
       });
     },
@@ -255,11 +269,8 @@ export default {
           console.log("ref video", this.$refs.video);
           this.imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
           this.video.srcObject = stream;
-          //this.video.src = window.URL.createObjectURL(stream);
           this.video.play();
-          //return navigator.mediaDevices.enumerateDevices();
         })
-        //.then(this.gotDevices)
         .catch(error => {
           console.error(error);
         });
@@ -271,9 +282,9 @@ export default {
     }
   },
   mounted() {
-    this.auth = {
-      headers: { Authorization: "Bearer " + localStorage.getItem("token") }
-    }
+    // this.auth = {
+    //   headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+    // }
     navigator.mediaDevices
       .enumerateDevices()
       .then(this.gotDevices)
@@ -281,7 +292,7 @@ export default {
         console.log("enumerateDevices() error: ", error);
       });
     axios
-      .get(process.env.VUE_APP_URL_API + "/employees-by-office", this.auth)
+      .get(process.env.VUE_APP_URL_API + '/employees-by-office')
       .then(res => {
         this.meeting.employees = res.data;
         this.meeting.employees = this.meeting.employees.map(obj => ({
@@ -292,13 +303,13 @@ export default {
       })
       .catch(err => {
         console.log(err)
-        if (err.response.status === 401) {
-          this.$router.push('/login')
-        }
+        // if (err.response.status === 401) {
+        //   this.$router.push('/login')
+        // }
       });
 
     axios
-      .get(process.env.VUE_APP_URL_API + "/employees-all", this.auth)
+      .get(process.env.VUE_APP_URL_API + '/employees-all')
       .then(res => {
         // console.log(res.data);
         this.all_employees = res.data;

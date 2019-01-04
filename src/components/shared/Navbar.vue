@@ -27,7 +27,7 @@
           <!-- <a v-if="!token" class="button is-primary" href="/login">
             <strong>Iniciar Sesión</strong>
           </a> -->
-          <button v-if="loggedOut || token" @click.prevent="logout" class="button is-light">
+          <button v-if="isAuthenticated" @click.prevent="logout" class="button is-light">
             Cerrar Sesión
           </button>
         </div>
@@ -42,41 +42,30 @@
 <script>
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
-import EventBus from './../../event-bus'
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
     return {
       token: localStorage.getItem('token'),
       isLoading: false,
-      showNav: false,
-      loggedIn: true,
-      loggedOut: false    
+      showNav: false,   
     }
   },
   methods: {
     logout () {
       this.isLoading = true
-      EventBus.$emit('logout')
-      localStorage.removeItem('token')
-      this.isLoading = false
-      this.$router.push('/login')
+      this.$store.dispatch('logout')
+        .then(() => {
+          this.isLoading = false
+          this.$router.push('/login')
+        })
     }
   },
-  mounted () {
-    
-  },
-  created () {
-    EventBus.$on('login', () => {
-      console.log('event login')
-      this.loggedIn = false
-      this.loggedOut = true
-    })
-
-    EventBus.$on('logout', () => {
-      this.loggedIn = true
-      this.loggedOut = false
-    })
-  }    
+  computed: {
+    ...mapGetters([
+      'isAuthenticated',
+    ])
+  }  
 }
 </script>

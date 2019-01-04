@@ -11,10 +11,25 @@
 
 <script>
 import Navbar from './components/shared/Navbar.vue'
+import axios from 'axios'
 
 export default {
   components: {
     Navbar
+  },
+  created() {
+    axios.interceptors.response.use(undefined, (err) => {
+      console.log('axios err', err.response)
+      return new Promise((resolve, reject) => {
+        if (err.response.status === 401 && err.response.config && !err.response.config.__isRetryRequest) {
+          this.$store.dispatch('logout')
+            .then(res => {
+              this.$router.push('login')
+            })
+        }
+        throw err;
+      });
+  });
   }
 }
 </script>

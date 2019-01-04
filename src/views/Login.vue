@@ -2,14 +2,16 @@
 <div class="login">
   <form @submit.prevent="login">
     <b-field label="Usuario">
-      <b-input v-model="user.username" placeholder="Usuario"></b-input>
+      <b-input v-model.trim="$v.user.username.$model" placeholder="Usuario"></b-input>
     </b-field>
+    <p class="help is-danger" v-if="$v.user.username.$dirty && !$v.user.username.required">El usuario es requerido</p>
     <b-field label="Contraseña">
-      <b-input v-model="user.password" type="password"
+      <b-input v-model.trim="$v.user.password.$model" type="password"
         placeholder="Contraseña"
         password-reveal>
       </b-input>
     </b-field>
+    <p class="help is-danger" v-if="$v.user.password.$dirty &&  !$v.user.password.required">La contraseña es requerida</p>
     <div class="field is-grouped is-grouped-centered">
       <p class="control">
         <button class="button is-primary">
@@ -30,10 +32,10 @@
 
 <script>
 import axios from 'axios';
-import EventBus from './../event-bus'
+import { required } from 'vuelidate/lib/validators'
 
 export default {
-   data () {
+  data () {
      return  {
        isLoading: false,
        user: {
@@ -41,24 +43,25 @@ export default {
          password: ''
        }
      }
-   },
+  },
+  validations: {
+    user: {
+      username: {
+        required
+      },
+      password: {
+        required
+      }
+    }
+  },
   methods: {
     login () {
       this.isLoading = true        
-              
-      axios.post(process.env.VUE_APP_URL_API + '/login', this.user)
-        .then(res => {
-          // console.log(res.data.token);
-
-          this.isLoading = false
-          localStorage.setItem('token', res.data.token)
-          localStorage.setItem('username', res.data.user.name)
-          EventBus.$emit('login')
+      this.$store.dispatch('login', this.user)
+        .then(() => {
+          this.isLoading = false    
           this.$router.push('/')
         })
-        .catch(err => {
-          console.log(err)
-        });
     }
   }
 }
