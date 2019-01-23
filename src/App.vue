@@ -19,7 +19,6 @@ export default {
   },
   created() {
     axios.interceptors.response.use(undefined, (err) => {
-      console.log('axios err', err.response)
       return new Promise((resolve, reject) => {
         if (err.response.status === 401 && err.response.config && !err.response.config.__isRetryRequest) {
           this.$store.dispatch('logout')

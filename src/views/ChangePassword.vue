@@ -1,10 +1,6 @@
 <template>
-<div class="login">
-  <form @submit.prevent="login">
-    <b-field label="Usuario">
-      <b-input v-model.trim="$v.user.username.$model" placeholder="Usuario"></b-input>
-    </b-field>
-    <p class="help is-danger" v-if="$v.user.username.$dirty && !$v.user.username.required">El usuario es requerido</p>
+<div class="changePassword">
+  <form @submit.prevent="changePassword">
     <b-field label="Contraseña">
       <b-input v-model.trim="$v.user.password.$model" type="password"
         placeholder="Contraseña"
@@ -12,15 +8,23 @@
       </b-input>
     </b-field>
     <p class="help is-danger" v-if="$v.user.password.$dirty &&  !$v.user.password.required">La contraseña es requerida</p>
+    <b-field label="Repetir Contraseña">
+      <b-input v-model.trim="$v.user.repeatPassword.$model" type="password"
+        placeholder="Repetir Contraseña"
+        password-reveal>
+      </b-input>
+    </b-field>
+    <p class="help is-danger" v-if="$v.user.repeatPassword.$dirty &&  !$v.user.repeatPassword.required">La contraseña es requerida</p>
+    <p class="help is-danger" v-if="$v.user.repeatPassword.$dirty &&  !$v.user.repeatPassword.sameAsPassword">Las contraseñas no coinciden</p>
     <div class="field is-grouped is-grouped-centered">
       <p class="control">
         <button class="button is-primary">
-          <strong>Iniciar Sesión</strong>
+          <strong>Aceptar</strong>
         </button>
       </p>
       <p class="control">
-        <a class="button is-light">
-          Salir
+        <a href="/" class="button is-light">
+          Cancelar
         </a> 
       </p>
     </div>
@@ -32,45 +36,52 @@
 
 <script>
 import axios from 'axios';
-import { required } from 'vuelidate/lib/validators'
+import { required, sameAs } from 'vuelidate/lib/validators'
 
 export default {
   data () {
      return  {
        isLoading: false,
        user: {
-         username: '',
-         password: ''
+         password: '',
+         repeatPassword: ''
        },
        submitStatus: null
      }
   },
   validations: {
     user: {
-      username: {
-        required
-      },
       password: {
         required
+      },
+      repeatPassword: {
+        required,
+        sameAsPassword: sameAs('password')
       }
     }
   },
   methods: {
-    login () {
+    changePassword () {
       this.isLoading = true
       if (this.$v.$invalid) {
         this.isLoading = false 
         this.$toast.open({
           duration: 3000,
-          message: `Ingrese su usuario y contraseña`,
+          message: `Rellene ambos campos`,
           position: 'is-top',
           type: 'is-danger'
         })
       } else {
-        this.$store.dispatch('login', this.user)
+        this.$store.dispatch('changePassword', this.user)
           .then(res => {
             this.isLoading = false
             if (res.status === 200) {
+              this.$toast.open({
+                duration: 3000,
+                message: `Contraseña cambiada correctamente`,
+                position: 'is-top',
+                type: 'is-success'
+              })
               this.$router.push('/')
             } else {
               this.$toast.open({
@@ -83,14 +94,7 @@ export default {
           })
           .catch(err => {
             this.isLoading = false
-            if (err.response.status === 422) {
-              this.$toast.open({
-                duration: 3000,
-                message: `Usuario o contraseña incorrecta!`,
-                position: 'is-top',
-                type: 'is-danger'
-              })
-            } else if (err.response.status === 500) {
+            if (err.response.status === 500) {
               this.$toast.open({
                 duration: 3000,
                 message: `Ocurrió un problema, inténtelo más tarde`,

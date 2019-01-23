@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import About from './views/About.vue'
 import Login from './views/Login.vue'
+import ChangePassword from './views/ChangePassword'
 
 Vue.use(Router)
 
@@ -24,6 +25,11 @@ let router = new Router({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/change-password',
+      name: 'change-password',
+      component: ChangePassword
     }
   ]
 })

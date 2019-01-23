@@ -172,6 +172,15 @@ export default {
                     type: 'is-danger'
                 })
           }
+          if (res.data.warning !== undefined) {
+            this.storeError = true
+            this.$toast.open({
+                    duration: 3000,
+                    message: `Asistencia ya fue registrada anteriormente`,
+                    position: 'is-bottom',
+                    type: 'is-warning'
+                })
+          }
           this.isLoading = false
         })
         .catch(err => {

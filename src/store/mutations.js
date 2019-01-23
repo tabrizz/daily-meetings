@@ -13,3 +13,8 @@ export const authLogout = (state) => {
   state.token = ''
   state.status = ''
 }
+
+export const changePasswordSuccess = (state, { token }) => {
+  state.token = token
+  state.status = 'success'
+}

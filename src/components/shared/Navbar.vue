@@ -18,7 +18,9 @@
       <a class="navbar-item">
         Inicio
       </a>
-      
+      <a href="/change-password" class="navbar-item">
+        Cambiar contraseña
+      </a>
     </div>
 
     <div class="navbar-end">
