@@ -1,32 +1,29 @@
 <template>
   <div class="home">
-    <b-notification v-if="storeSuccess" type="is-success">
-      Asistencia guardada correctamente
-    </b-notification>
-    <b-notification v-if="storeError" type="is-danger">
-      No se pudo guardar la asistencia
-    </b-notification>
+    <b-notification v-if="storeSuccess" type="is-success">Asistencia guardada correctamente</b-notification>
+    <b-notification v-if="storeError" type="is-danger">No se pudo guardar la asistencia</b-notification>
 
-    <b-field label="Selecciona una fecha">
-      <b-datepicker @input="getMeeting" v-model="selectedDate" placeholder="Click para seleccionar..." icon="calendar-today"></b-datepicker>
+    <b-field label="1) Selecciona una fecha">
+      <b-datepicker
+        @input="getMeeting"
+        v-model="selectedDate"
+        placeholder="Click para seleccionar..."
+        icon="calendar-today"
+      ></b-datepicker>
     </b-field>
     <b-collapse class="panel" :open.sync="isOpenTitle">
       <div slot="trigger" class="panel-heading">
-        <strong>Ley</strong>
+        <strong>2) Tema de la Semana</strong>
       </div>
-      <div class="panel-block">
-        {{ title }}
-      </div>
+      <div class="panel-block">{{ title }}</div>
     </b-collapse>
     <b-collapse class="panel" :open.sync="isOpenContent">
       <div slot="trigger" class="panel-heading">
-        <strong>Recomendaciones</strong>
+        <strong>3) Descripción del Tema</strong>
       </div>
-      <div class="panel-block">
-        {{ description }}
-      </div>
+      <div class="panel-block">{{ description }}</div>
     </b-collapse>
-    
+    <label class="label">4) Marcar Asistencia</label>
     <div class="box">
       <div class="table-container">
         <table class="table is-narrow is-striped is-size-7">
@@ -34,7 +31,7 @@
             <tr>
               <th>Apellidos y Nombres</th>
               <th>Asistió</th>
-              <th>Opciones</th>
+              <th>Motivo de Inasistencia</th>
             </tr>
           </thead>
           <tbody>
@@ -47,8 +44,13 @@
               </td>
               <td>
                 <b-field>
-                  <b-select :disabled="employee.attended" 
-                            v-model="employee.missing_reason" class="is-size-7" placeholder="Selecciona" rounded>
+                  <b-select
+                    :disabled="employee.attended"
+                    v-model="employee.missing_reason"
+                    class="is-size-7"
+                    placeholder="Selecciona"
+                    rounded
+                  >
                     <option value="Ninguno">Ninguno</option>
                     <option value="Tarde">Tarde</option>
                     <option value="Permiso">Permiso</option>
@@ -64,7 +66,7 @@
       </div>
     </div>
 
-    <b-field label="Agregar Invitados">
+    <b-field label="5) Agregar Invitados">
       <b-taginput
         v-model="meeting.guests"
         :data="filteredTags"
@@ -79,7 +81,7 @@
       </b-taginput>
     </b-field>
 
-    <b-field label="Cámara">
+    <b-field label="6) Tomar fotografías de Evidencia">
       <b-select v-model="selectedCameraId" placeholder="Selecciona la cámara" @input="getStream">
         <option v-for="option in cameras" :value="option.id" :key="option.id">{{ option.text }}</option>
       </b-select>
@@ -111,17 +113,17 @@
 <script>
 // @ is an alias to /src
 import axios from "axios";
-import moment from 'moment';
+import moment from "moment";
 
 export default {
   data() {
     return {
       moment: moment(),
       selectedDate: null,
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       meeting: {
-        meeting_id: '',
+        meeting_id: "",
         employees: [],
         guests: [],
         observations: [],
@@ -150,70 +152,76 @@ export default {
     };
   },
   methods: {
-    storeMeeting () {
-      this.isLoading = true
-      axios.post(process.env.VUE_APP_URL_API + '/meeting-attendance', this.meeting)
+    storeMeeting() {
+      this.isLoading = true;
+      axios
+        .post(process.env.VUE_APP_URL_API + "/meeting-attendance", this.meeting)
         .then(res => {
           if (res.data.success !== undefined) {
-            this.storeSuccess = true
+            this.storeSuccess = true;
             this.$toast.open({
-                    duration: 3000,
-                    message: `Asistencia guardada`,
-                    position: 'is-bottom',
-                    type: 'is-success'
-                })
+              duration: 3000,
+              message: `Asistencia guardada`,
+              position: "is-bottom",
+              type: "is-success"
+            });
           }
           if (res.data.error !== undefined) {
-            this.storeError = true
+            this.storeError = true;
             this.$toast.open({
-                    duration: 3000,
-                    message: `Asistencia no se guardó`,
-                    position: 'is-bottom',
-                    type: 'is-danger'
-                })
+              duration: 3000,
+              message: `Asistencia no se guardó`,
+              position: "is-bottom",
+              type: "is-danger"
+            });
           }
           if (res.data.warning !== undefined) {
-            this.storeError = true
+            this.storeError = true;
             this.$toast.open({
-                    duration: 3000,
-                    message: `Asistencia ya fue registrada anteriormente`,
-                    position: 'is-bottom',
-                    type: 'is-warning'
-                })
+              duration: 3000,
+              message: `Asistencia ya fue registrada anteriormente`,
+              position: "is-bottom",
+              type: "is-warning"
+            });
           }
-          this.isLoading = false
+          this.isLoading = false;
         })
         .catch(err => {
           if (err.response.status === 500) {
-            this.isLoading = false
-            this.storeError = true
+            this.isLoading = false;
+            this.storeError = true;
             this.$toast.open({
-                    duration: 3000,
-                    message: `Asistencia no se guardó`,
-                    position: 'is-bottom',
-                    type: 'is-danger'
-                })
+              duration: 3000,
+              message: `Asistencia no se guardó`,
+              position: "is-bottom",
+              type: "is-danger"
+            });
           }
-        })
+        });
     },
     getMeeting() {
-      this.meeting.selectedDate = moment(new Date(this.selectedDate)).format('YYYY-MM-DD')
-      
-      axios.get(process.env.VUE_APP_URL_API + '/meetings/' + this.meeting.selectedDate)
+      this.meeting.selectedDate = moment(new Date(this.selectedDate)).format(
+        "YYYY-MM-DD"
+      );
+
+      axios
+        .get(
+          process.env.VUE_APP_URL_API + "/meetings/" + this.meeting.selectedDate
+        )
         .then(res => {
           if (res.data.length > 0) {
-            this.meeting.meeting_id = res.data[0].id
-            this.title = res.data[0].title
-            this.description = res.data[0].description  
+            this.meeting.meeting_id = res.data[0].id;
+            this.title = res.data[0].title;
+            this.description = res.data[0].description;
           } else {
-            this.meeting.meeting_id = null
-            this.title = 'No Disponible'
-            this.description = 'No Disponible'
+            this.meeting.meeting_id = null;
+            this.title = "No Disponible";
+            this.description = "No Disponible";
           }
         })
         .catch(err => {
-          console.log(err)  
-        })
+          console.log(err);
+        });
     },
     getFilteredTags(text) {
       this.filteredTags = this.all_employees.filter(option => {
@@ -243,12 +251,12 @@ export default {
           option.id = mediaDevice.deviceId;
           // option.text = mediaDevice.label || `Camera ${count++}`;
           if (count === 1) {
-            option.text =  `Tomar Foto Grupal`
+            option.text = `1 Tomar Foto Grupal`;
           } else {
-            option.text = `Tomar Foto Control Asistencia`
+            option.text = `2 Tomar Foto Lista Asistencia PDS01-R03`;
           }
           this.cameras.push(option);
-          count++
+          count++;
         }
       });
     },
@@ -301,7 +309,7 @@ export default {
         console.log("enumerateDevices() error: ", error);
       });
     axios
-      .get(process.env.VUE_APP_URL_API + '/employees-by-office')
+      .get(process.env.VUE_APP_URL_API + "/employees-by-office")
       .then(res => {
         this.meeting.employees = res.data;
         this.meeting.employees = this.meeting.employees.map(obj => ({
@@ -311,14 +319,14 @@ export default {
         }));
       })
       .catch(err => {
-        console.log(err)
+        console.log(err);
         // if (err.response.status === 401) {
         //   this.$router.push('/login')
         // }
       });
 
     axios
-      .get(process.env.VUE_APP_URL_API + '/employees-all')
+      .get(process.env.VUE_APP_URL_API + "/employees-all")
       .then(res => {
         // console.log(res.data);
         this.all_employees = res.data;
@@ -359,5 +367,4 @@ li {
   max-width: 100px;
   max-height: 100px;
 }
-
 </style>
