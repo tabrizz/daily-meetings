@@ -35,8 +35,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="employee in meeting.employees" :key="employee.id">
-              <td>{{ employee.last_name }} {{ employee.first_name }}</td>
+            <tr v-for="employee in meeting.employeesList" :key="employee.id">
+              <td>{{ employee.lastName }} {{ employee.firstName }}</td>
               <td>
                 <div class="field">
                   <b-checkbox type="is-success" v-model="employee.attended"></b-checkbox>
@@ -46,7 +46,7 @@
                 <b-field>
                   <b-select
                     :disabled="employee.attended"
-                    v-model="employee.missing_reason"
+                    v-model="employee.missingReason"
                     class="is-size-7"
                     placeholder="Selecciona"
                     rounded
@@ -71,19 +71,23 @@
         v-model="meeting.guests"
         :data="filteredTags"
         autocomplete
-        field="last_name"
+        field="lastName"
         icon="label"
         placeholder="Agrega invitado"
         @typing="getFilteredTags"
       >
-        <template slot-scope="props">{{ props.option.first_name }} {{ props.option.last_name }}</template>
+        <template slot-scope="props">{{ props.option.firstName }} {{ props.option.lastName }}</template>
         <template slot="empty">No hay colaboradores registrados</template>
       </b-taginput>
     </b-field>
 
     <b-field label="6) Tomar fotografías de Evidencia">
       <b-select v-model="selectedCameraId" placeholder="Selecciona la cámara" @input="getStream">
-        <option v-for="option in cameras" :value="option.id" :key="option.id">{{ option.text }}</option>
+        <option v-for="option in cameras" :value="option.id" :key="option.id">
+          {{
+          option.text
+          }}
+        </option>
       </b-select>
     </b-field>
 
@@ -91,7 +95,7 @@
     <canvas ref="canvas"></canvas>
     <ul>
       <li v-for="c in meeting.captures" :key="c">
-        <img class="captures" :src="c">
+        <img class="captures" :src="c" />
       </li>
     </ul>
 
@@ -101,7 +105,7 @@
       </button>
     </div>
     <div class="field has-text-centered">
-      <button @click="storeMeeting" class="button is-primary is-rounded">
+      <button @click.prevent="storeMeeting()" class="button is-primary is-rounded">
         <b-icon icon="content-save"></b-icon>
         <span>Guardar Asistencia</span>
       </button>
@@ -111,7 +115,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import axios from "axios";
 import moment from "moment";
 
@@ -123,11 +126,9 @@ export default {
       title: "",
       description: "",
       meeting: {
-        meeting_id: "",
-        employees: [],
+        id: null,
+        employeesList: [],
         guests: [],
-        observations: [],
-        suggestions: [],
         captures: [],
         selectedDate: null
       },
@@ -144,7 +145,7 @@ export default {
       canvas: null,
       imageCapture: null,
       selectedCameraId: null,
-      all_employees: [],
+      allEmployees: [],
       auth: {},
       isLoading: false,
       storeSuccess: false,
@@ -155,29 +156,31 @@ export default {
     storeMeeting() {
       this.isLoading = true;
       axios
-        .post(process.env.VUE_APP_URL_API + "/meeting-attendance", this.meeting)
+        .post(
+          process.env.VUE_APP_URL_API +
+            `/meetings/${this.meeting.id}/attendance`,
+          this.meeting
+        )
         .then(res => {
-          if (res.data.success !== undefined) {
+          if (res.status === 200) {
             this.storeSuccess = true;
-            this.$toast.open({
+            this.$buefy.toast.open({
               duration: 3000,
               message: `Asistencia guardada`,
               position: "is-bottom",
               type: "is-success"
             });
+            this.meeting = {
+              id: null,
+              employeesList: [],
+              guests: [],
+              captures: [],
+              selectedDate: null
+            };
           }
-          if (res.data.error !== undefined) {
+          if (res.status === 500) {
             this.storeError = true;
-            this.$toast.open({
-              duration: 3000,
-              message: `Asistencia no se guardó`,
-              position: "is-bottom",
-              type: "is-danger"
-            });
-          }
-          if (res.data.warning !== undefined) {
-            this.storeError = true;
-            this.$toast.open({
+            this.$buefy.toast.open({
               duration: 3000,
               message: `Asistencia ya fue registrada anteriormente`,
               position: "is-bottom",
@@ -187,10 +190,10 @@ export default {
           this.isLoading = false;
         })
         .catch(err => {
-          if (err.response.status === 500) {
+          if (err.response.status === 400) {
             this.isLoading = false;
             this.storeError = true;
-            this.$toast.open({
+            this.$buefy.toast.open({
               duration: 3000,
               message: `Asistencia no se guardó`,
               position: "is-bottom",
@@ -206,15 +209,18 @@ export default {
 
       axios
         .get(
-          process.env.VUE_APP_URL_API + "/meetings/" + this.meeting.selectedDate
+          process.env.VUE_APP_URL_API +
+            `/meetings/${localStorage.getItem("id")}/user?startDate=${
+              this.meeting.selectedDate
+            }`
         )
         .then(res => {
-          if (res.data.length > 0) {
-            this.meeting.meeting_id = res.data[0].id;
-            this.title = res.data[0].title;
-            this.description = res.data[0].description;
+          if (res.data) {
+            this.meeting.id = res.data.id;
+            this.title = res.data.title;
+            this.description = res.data.description;
           } else {
-            this.meeting.meeting_id = null;
+            this.meeting.id = null;
             this.title = "No Disponible";
             this.description = "No Disponible";
           }
@@ -224,9 +230,9 @@ export default {
         });
     },
     getFilteredTags(text) {
-      this.filteredTags = this.all_employees.filter(option => {
+      this.filteredTags = this.allEmployees.filter(option => {
         return (
-          option.last_name
+          option.lastName
             .toString()
             .toLowerCase()
             .indexOf(text.toString().toLowerCase()) >= 0
@@ -309,13 +315,16 @@ export default {
         console.log("enumerateDevices() error: ", error);
       });
     axios
-      .get(process.env.VUE_APP_URL_API + "/employees-by-office")
+      .get(
+        process.env.VUE_APP_URL_API +
+          `/employees/office/${localStorage.getItem("officeId")}`
+      )
       .then(res => {
-        this.meeting.employees = res.data;
-        this.meeting.employees = this.meeting.employees.map(obj => ({
+        this.meeting.employeesList = res.data;
+        this.meeting.employeesList = this.meeting.employeesList.map(obj => ({
           ...obj,
           attended: true,
-          missing_reason: null
+          missingReason: "Asistió"
         }));
       })
       .catch(err => {
@@ -326,11 +335,11 @@ export default {
       });
 
     axios
-      .get(process.env.VUE_APP_URL_API + "/employees-all")
+      .get(process.env.VUE_APP_URL_API + "/employees")
       .then(res => {
         // console.log(res.data);
-        this.all_employees = res.data;
-        this.filteredTags = this.all_employees;
+        this.allEmployees = res.data;
+        this.filteredTags = this.allEmployees;
       })
       .catch(err => console.log(err));
   }
