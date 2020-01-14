@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <h4 class="title">Charla Semanal</h4>
     <b-notification v-if="storeSuccess" type="is-success">Asistencia guardada correctamente</b-notification>
     <b-notification v-if="storeError" type="is-danger">No se pudo guardar la asistencia</b-notification>
 

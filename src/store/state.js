@@ -1,5 +1,5 @@
 export default {
-  token: localStorage.getItem('token') || '',
-  status: '',
-  username: '',
-}
+  token: localStorage.getItem("token") || "",
+  status: "",
+  name: ""
+};

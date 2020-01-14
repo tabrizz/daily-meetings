@@ -5,11 +5,12 @@ export const login = ({ commit }, user) => {
     axios
       .post(process.env.VUE_APP_URL_API + "/users/authenticate", user)
       .then(res => {
-        const { id, token, name, officeId } = res.data;
+        const { id, token, name, officeId, role } = res.data;
 
         localStorage.setItem("token", token);
         localStorage.setItem("id", id);
         localStorage.setItem("officeId", officeId);
+        localStorage.setItem("role", role);
 
         commit("authSuccess", { token, name });
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -30,6 +31,7 @@ export const logout = ({ commit }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("id");
     localStorage.removeItem("officeId");
+    localStorage.removeItem("role");
     delete axios.defaults.headers.common["Authorization"];
 
     resolve();

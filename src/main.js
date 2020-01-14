@@ -6,7 +6,7 @@ import Buefy from "buefy";
 import Vuelidate from "vuelidate";
 import store from "./store";
 import axios from "axios";
-// import 'buefy/dist/buefy.css'
+import "buefy/dist/buefy.css";
 
 Vue.use(Buefy);
 Vue.use(Vuelidate);

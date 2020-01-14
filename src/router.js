@@ -3,8 +3,11 @@ import Router from "vue-router";
 import Home from "./views/Home.vue";
 import About from "./views/About.vue";
 import Login from "./views/Login.vue";
-import CreateMeeting from "./views/CreateMeeting.vue";
 import ChangePassword from "./views/ChangePassword";
+import MeetingsIndex from "./views/Meetings/Index";
+import ListMeetings from "./views/Meetings/ListMeetings";
+import CreateMeeting from "./views/Meetings/CreateMeeting";
+import ShowMeeting from "./views/Meetings/ShowMeeting";
 
 Vue.use(Router);
 
@@ -33,9 +36,27 @@ let router = new Router({
       component: ChangePassword
     },
     {
-      path: "/create-meeting",
-      name: "create-meeting",
-      component: CreateMeeting
+      path: "/meetings",
+      name: "meetings",
+      redirect: "/meetings/list",
+      component: MeetingsIndex,
+      children: [
+        {
+          path: "create",
+          name: "create-meeting",
+          component: CreateMeeting
+        },
+        {
+          path: "list",
+          name: "list-meeting",
+          component: ListMeetings
+        },
+        {
+          path: "show/:id",
+          name: "show-meeting",
+          component: ShowMeeting
+        }
+      ]
     }
   ]
 });
