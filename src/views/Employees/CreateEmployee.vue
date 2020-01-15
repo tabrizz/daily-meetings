@@ -1,23 +1,35 @@
 <template>
   <div>
     <ValidationObserver v-slot="{ handleSubmit }">
-      <form @submit.prevent="handleSubmit(submitUser)">
+      <form @submit.prevent="handleSubmit(submitEmployee)">
         <ValidationProvider rules="required" v-slot="{ errors }">
-          <b-field label="Nombres y Apellidos">
-            <b-input v-model="user.name"></b-input>
+          <b-field label="Nombres">
+            <b-input v-model="employee.firstName"></b-input>
+          </b-field>
+          <p class="help is-danger">{{ errors[0] }}</p>
+        </ValidationProvider>
+        <ValidationProvider rules="required" v-slot="{ errors }">
+          <b-field label="Apellidos">
+            <b-input v-model="employee.lastName"></b-input>
+          </b-field>
+          <p class="help is-danger">{{ errors[0] }}</p>
+        </ValidationProvider>
+        <ValidationProvider rules="required" v-slot="{ errors }">
+          <b-field label="DNI">
+            <b-input v-model="employee.dni"></b-input>
           </b-field>
           <p class="help is-danger">{{ errors[0] }}</p>
         </ValidationProvider>
         <ValidationProvider rules="required|email" v-slot="{ errors }">
           <b-field label="Correo">
-            <b-input v-model="user.email"></b-input>
+            <b-input v-model="employee.email"></b-input>
           </b-field>
           <p class="help is-danger">{{ errors[0] }}</p>
         </ValidationProvider>
         <b-field label="Oficina">
           <b-select
             placeholder="Selecciona una oficina"
-            v-model="user.officeId"
+            v-model="employee.officeId"
           >
             <option
               v-for="office in offices"
@@ -27,34 +39,6 @@
             >
           </b-select>
         </b-field>
-        <ValidationProvider
-          rules="required|confirmed:repeatPassword"
-          v-slot="{ errors }"
-        >
-          <b-field label="Contraseña">
-            <b-input
-              v-model="user.password"
-              type="password"
-              placeholder="Contraseña"
-              password-reveal
-              ref="user.password"
-            ></b-input>
-          </b-field>
-          <p class="help is-danger">{{ errors[0] }}</p>
-        </ValidationProvider>
-        <ValidationProvider v-slot="{ errors }" vid="repeatPassword">
-          <b-field label="Repetir Contraseña">
-            <b-input
-              v-model="repeatPassword"
-              type="password"
-              ref="repeatPassword"
-              placeholder="Repetir Contraseña"
-              password-reveal
-            ></b-input>
-          </b-field>
-          <p class="help is-danger">{{ errors[0] }}</p>
-        </ValidationProvider>
-
         <div class="field is-grouped is-grouped-centered">
           <p class="control">
             <button type="submit" class="button is-primary">Guardar</button>
@@ -63,7 +47,7 @@
             <b-button
               tag="router-link"
               type="is-danger"
-              :to="{ name: 'list-user' }"
+              :to="{ name: 'list-employee' }"
               >Cancelar</b-button
             >
           </p>
@@ -80,23 +64,17 @@ export default {
   data() {
     return {
       id: null,
-      user: {
-        name: "",
+      employee: {
+        firstName: "",
+        lastName: "",
         email: "",
-        password: "",
-        officeId: null,
-        role: "USER"
+        dni: "",
+        officeId: null
       },
-      repeatPassword: "",
-      offices: [],
-      changePass: false
+      offices: []
     };
   },
   methods: {
-    cleanFields() {
-      this.repeatPassword = "";
-      this.user.password = "";
-    },
     getOffices() {
       axios
         .get(process.env.VUE_APP_URL_API + `/offices`)
@@ -105,12 +83,12 @@ export default {
         })
         .catch(err => console.log(err));
     },
-    submitUser() {
+    submitEmployee() {
       axios
-        .post(process.env.VUE_APP_URL_API + `/users/register`, this.user)
+        .post(process.env.VUE_APP_URL_API + `/employees`, this.employee)
         .then(res => {
           if (res.status === 200) {
-            this.$router.push("/users");
+            this.$router.push("/employees");
           } else {
             this.$buefy.toast.open({
               duration: 3000,

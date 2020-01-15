@@ -13,14 +13,14 @@
         </b-field>
       </div>
       <div class="column">
-        <button class="button is-primary" @click.prevent="getUsersByOffice">
+        <button class="button is-primary" @click.prevent="getEmployeesByOffice">
           <strong>Buscar</strong>
         </button>
       </div>
     </div>
 
     <b-table
-      :data="users"
+      :data="employees"
       :paginated="true"
       :per-page="`12`"
       :default-sort-direction="`asc`"
@@ -36,14 +36,20 @@
           props.row.id
         }}</b-table-column>
 
-        <b-table-column field="title" label="Nombres" sortable>{{
-          props.row.name
+        <b-table-column field="firstName" label="Nombres" sortable>{{
+          props.row.firstName
+        }}</b-table-column>
+        <b-table-column field="lastName" label="Apellidos" sortable>{{
+          props.row.lastName
+        }}</b-table-column>
+        <b-table-column field="dni" label="DNI" sortable>{{
+          props.row.dni
         }}</b-table-column>
         <b-table-column label="Opciones">
           <b-button
             icon-left="lead-pencil"
             tag="router-link"
-            :to="{ name: 'edit-user', params: { id: props.row.id } }"
+            :to="{ name: 'edit-employee', params: { id: props.row.id } }"
             type="is-info"
           ></b-button>
         </b-table-column>
@@ -60,7 +66,7 @@ export default {
       office: "",
       selectedOffice: null,
       offices: [],
-      users: []
+      employees: []
     };
   },
   methods: {
@@ -72,14 +78,14 @@ export default {
         })
         .catch(err => console.log(err));
     },
-    getUsersByOffice() {
+    getEmployeesByOffice() {
       axios
         .get(
           process.env.VUE_APP_URL_API +
-            `/users?officeId=${this.selectedOffice.id}`
+            `/employees/office/${this.selectedOffice.id}`
         )
         .then(res => {
-          this.users = res.data;
+          this.employees = res.data;
         })
         .catch(err => console.log(err));
     }

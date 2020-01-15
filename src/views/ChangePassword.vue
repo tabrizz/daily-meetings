@@ -24,7 +24,7 @@
       <p
         class="help is-danger"
         v-if="$v.user.repeatPassword.$dirty &&  !$v.user.repeatPassword.required"
-      >La contraseña es requerida</p>
+      >Vuelva a escribir la contraseña es requerida</p>
       <p
         class="help is-danger"
         v-if="$v.user.repeatPassword.$dirty &&  !$v.user.repeatPassword.sameAsPassword"

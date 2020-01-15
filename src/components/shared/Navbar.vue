@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-navbar :shadow="true" type="is-dark">
+    <b-navbar :shadow="true" type="is-primary">
       <template slot="brand">
         <b-navbar-item>
           <img src="@/assets/electro_icon.png" width="28" height="28" />
@@ -11,10 +11,32 @@
       </template>
       <template slot="start" v-if="isAuthenticated">
         <b-navbar-item to="/" tag="router-link">Inicio</b-navbar-item>
-        <b-navbar-item to="/change-password" tag="router-link">Cambiar contraseña</b-navbar-item>
+        <b-navbar-item to="/change-password" tag="router-link"
+          >Cambiar contraseña</b-navbar-item
+        >
         <b-navbar-dropdown label="Charlas">
-          <b-navbar-item :to="{ name: 'list-meeting'}" tag="router-link">Listar</b-navbar-item>
-          <b-navbar-item :to="{ name: 'create-meeting'}" tag="router-link">Crear</b-navbar-item>
+          <b-navbar-item :to="{ name: 'list-meeting' }" tag="router-link"
+            >Listar</b-navbar-item
+          >
+          <b-navbar-item :to="{ name: 'create-meeting' }" tag="router-link"
+            >Crear</b-navbar-item
+          >
+        </b-navbar-dropdown>
+        <b-navbar-dropdown label="Usuarios">
+          <b-navbar-item :to="{ name: 'list-user' }" tag="router-link"
+            >Listar</b-navbar-item
+          >
+          <b-navbar-item :to="{ name: 'create-user' }" tag="router-link"
+            >Crear</b-navbar-item
+          >
+        </b-navbar-dropdown>
+        <b-navbar-dropdown label="Empleados">
+          <b-navbar-item :to="{ name: 'list-employee' }" tag="router-link"
+            >Listar</b-navbar-item
+          >
+          <b-navbar-item :to="{ name: 'create-employee' }" tag="router-link"
+            >Crear</b-navbar-item
+          >
         </b-navbar-dropdown>
       </template>
 
@@ -25,7 +47,9 @@
               v-if="isAuthenticated"
               @click.prevent="logout"
               class="button is-light"
-            >Cerrar Sesión</button>
+            >
+              Cerrar Sesión
+            </button>
           </div>
         </b-navbar-item>
       </template>

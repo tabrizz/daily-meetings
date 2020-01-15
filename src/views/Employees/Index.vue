@@ -2,15 +2,16 @@
   <div>
     <div class="columns">
       <div class="column is-four-fifths">
-        <h3 class="title">Usuarios</h3>
+        <h3 class="title">Empleados</h3>
       </div>
       <div class="column">
         <b-button
           icon-left="plus"
           tag="router-link"
-          :to="{ name: 'create-user'}"
+          :to="{ name: 'create-employee' }"
           type="is-success"
-        >Crear Usuario</b-button>
+          >Crear Empleado</b-button
+        >
       </div>
     </div>
     <div>

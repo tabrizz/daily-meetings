@@ -6,11 +6,29 @@ import Buefy from "buefy";
 import Vuelidate from "vuelidate";
 import store from "./store";
 import axios from "axios";
+import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 import "buefy/dist/buefy.css";
 
 Vue.use(Buefy);
 Vue.use(Vuelidate);
 Vue.config.productionTip = false;
+
+import { required, confirmed, email } from "vee-validate/dist/rules";
+extend("required", {
+  ...required,
+  message: "El campo es requerido"
+});
+extend("confirmed", {
+  ...confirmed,
+  message: "Los campos no coinciden"
+});
+extend("email", {
+  ...email,
+  message: "Ingrese un correo válido"
+});
+
+Vue.component("ValidationProvider", ValidationProvider);
+Vue.component("ValidationObserver", ValidationObserver);
 
 const token = localStorage.getItem("token");
 const val = !!token;

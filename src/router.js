@@ -9,6 +9,16 @@ import ListMeetings from "./views/Meetings/ListMeetings";
 import CreateMeeting from "./views/Meetings/CreateMeeting";
 import ShowMeeting from "./views/Meetings/ShowMeeting";
 
+import UsersIndex from "./views/Users/Index";
+import ListUsers from "./views/Users/ListUsers";
+import CreateUser from "./views/Users/CreateUser";
+import EditUser from "./views/Users/EditUser";
+
+import EmployeesIndex from "./views/Employees/Index";
+import ListEmployees from "./views/Employees/ListEmployees";
+import CreateEmployee from "./views/Employees/CreateEmployee";
+import EditEmployee from "./views/Employees/EditEmployee";
+
 Vue.use(Router);
 
 let router = new Router({
@@ -55,6 +65,52 @@ let router = new Router({
           path: "show/:id",
           name: "show-meeting",
           component: ShowMeeting
+        }
+      ]
+    },
+    {
+      path: "/users",
+      name: "users",
+      redirect: "/users/list",
+      component: UsersIndex,
+      children: [
+        {
+          path: "create",
+          name: "create-user",
+          component: CreateUser
+        },
+        {
+          path: "list",
+          name: "list-user",
+          component: ListUsers
+        },
+        {
+          path: "edit/:id",
+          name: "edit-user",
+          component: EditUser
+        }
+      ]
+    },
+    {
+      path: "/employees",
+      name: "employees",
+      redirect: "/employees/list",
+      component: EmployeesIndex,
+      children: [
+        {
+          path: "create",
+          name: "create-employee",
+          component: CreateEmployee
+        },
+        {
+          path: "list",
+          name: "list-employee",
+          component: ListEmployees
+        },
+        {
+          path: "edit/:id",
+          name: "edit-employee",
+          component: EditEmployee
         }
       ]
     }

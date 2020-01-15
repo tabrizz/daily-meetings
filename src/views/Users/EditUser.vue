@@ -1,19 +1,13 @@
 <template>
   <div>
     <ValidationObserver v-slot="{ handleSubmit }">
-      <form @submit.prevent="handleSubmit(submitUser)">
-        <ValidationProvider rules="required" v-slot="{ errors }">
-          <b-field label="Nombres y Apellidos">
-            <b-input v-model="user.name"></b-input>
-          </b-field>
-          <p class="help is-danger">{{ errors[0] }}</p>
-        </ValidationProvider>
-        <ValidationProvider rules="required|email" v-slot="{ errors }">
-          <b-field label="Correo">
-            <b-input v-model="user.email"></b-input>
-          </b-field>
-          <p class="help is-danger">{{ errors[0] }}</p>
-        </ValidationProvider>
+      <form @submit.prevent="handleSubmit(editUser)">
+        <b-field label="Nombres y Apellidos">
+          <b-input v-model="user.name" disabled></b-input>
+        </b-field>
+        <b-field label="Correo">
+          <b-input v-model="user.email" disabled></b-input>
+        </b-field>
         <b-field label="Oficina">
           <b-select
             placeholder="Selecciona una oficina"
@@ -27,34 +21,40 @@
             >
           </b-select>
         </b-field>
-        <ValidationProvider
-          rules="required|confirmed:repeatPassword"
-          v-slot="{ errors }"
-        >
-          <b-field label="Contraseña">
-            <b-input
-              v-model="user.password"
-              type="password"
-              placeholder="Contraseña"
-              password-reveal
-              ref="user.password"
-            ></b-input>
-          </b-field>
-          <p class="help is-danger">{{ errors[0] }}</p>
-        </ValidationProvider>
-        <ValidationProvider v-slot="{ errors }" vid="repeatPassword">
-          <b-field label="Repetir Contraseña">
-            <b-input
-              v-model="repeatPassword"
-              type="password"
-              ref="repeatPassword"
-              placeholder="Repetir Contraseña"
-              password-reveal
-            ></b-input>
-          </b-field>
-          <p class="help is-danger">{{ errors[0] }}</p>
-        </ValidationProvider>
-
+        <div class="field">
+          <b-switch v-model="changePass" @input="cleanFields"
+            >Cambiar contraseña</b-switch
+          >
+        </div>
+        <div class="section" v-if="changePass">
+          <ValidationProvider
+            rules="required|confirmed:repeatPassword"
+            v-slot="{ errors }"
+          >
+            <b-field label="Contraseña">
+              <b-input
+                v-model="user.password"
+                type="password"
+                placeholder="Contraseña"
+                password-reveal
+                ref="user.password"
+              ></b-input>
+            </b-field>
+            <p class="help is-danger">{{ errors[0] }}</p>
+          </ValidationProvider>
+          <ValidationProvider v-slot="{ errors }" vid="repeatPassword">
+            <b-field label="Repetir Contraseña">
+              <b-input
+                v-model="repeatPassword"
+                type="password"
+                ref="repeatPassword"
+                placeholder="Repetir Contraseña"
+                password-reveal
+              ></b-input>
+            </b-field>
+            <p class="help is-danger">{{ errors[0] }}</p>
+          </ValidationProvider>
+        </div>
         <div class="field is-grouped is-grouped-centered">
           <p class="control">
             <button type="submit" class="button is-primary">Guardar</button>
@@ -80,13 +80,7 @@ export default {
   data() {
     return {
       id: null,
-      user: {
-        name: "",
-        email: "",
-        password: "",
-        officeId: null,
-        role: "USER"
-      },
+      user: {},
       repeatPassword: "",
       offices: [],
       changePass: false
@@ -97,6 +91,11 @@ export default {
       this.repeatPassword = "";
       this.user.password = "";
     },
+    getUser() {
+      axios.get(process.env.VUE_APP_URL_API + `/users/${this.id}`).then(res => {
+        this.user = res.data;
+      });
+    },
     getOffices() {
       axios
         .get(process.env.VUE_APP_URL_API + `/offices`)
@@ -105,9 +104,9 @@ export default {
         })
         .catch(err => console.log(err));
     },
-    submitUser() {
+    editUser() {
       axios
-        .post(process.env.VUE_APP_URL_API + `/users/register`, this.user)
+        .put(process.env.VUE_APP_URL_API + `/users/${this.id}`, this.user)
         .then(res => {
           if (res.status === 200) {
             this.$router.push("/users");
@@ -132,6 +131,8 @@ export default {
     }
   },
   mounted() {
+    this.id = this.$route.params.id;
+    this.getUser();
     this.getOffices();
   }
 };
