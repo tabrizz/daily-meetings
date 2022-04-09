@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^0.19.1",
     "buefy": "^0.8.9",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "register-service-worker": "^1.6.2",
     "vee-validate": "^3.2.1",
     "vue": "^2.6.11",
